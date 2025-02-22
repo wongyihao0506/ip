@@ -1,5 +1,4 @@
 import java.util.Scanner;
-import java.util.ArrayList;
 
 
 public class Growler {
@@ -16,9 +15,19 @@ public class Growler {
             if (userInput.equals("bye")) {
                 System.out.println(Farewell);
                 break;
-            } else if (userInput.startsWith("mark ")) {
+            } else if (userInput.startsWith("mark")) {
+                // Validate input and mark the task as done
+                if (!isValidTaskCommand(userInput, "mark")) {
+                    System.out.println("Invalid format! Use: mark <task number>");
+                    return;
+                }
                 markList(userInput, true);
-            } else if (userInput.startsWith("unmark ")) {
+            } else if (userInput.startsWith("unmark")) {
+                // Validate input and mark the task as not done
+                if (!isValidTaskCommand(userInput, "unmark")) {
+                    System.out.println("Invalid format! Use: unmark <task number>");
+                    return;
+                }
                 markList(userInput, false);
             } else if (userInput.equals("list")) {
                 showList();
@@ -29,18 +38,46 @@ public class Growler {
         in.close();
     }
     private static void addTask(String userInput) {
-        if (userInput.startsWith("todo ")) {
-            String taskName = userInput.substring(5);
-            tasks[taskIndex] = new Todo(taskName);
-            System.out.println("Got it. I've added this task:\n  [T][ ] " + taskName);
-        } else if (userInput.startsWith("deadline ")) {
-            String[] parts = userInput.substring(9).split(" /by ", 2);
-            tasks[taskIndex] = new Deadline(parts[0], parts[1]);
+        if (userInput.startsWith("todo")) {
+            String taskName = userInput.substring(4).trim(); // Trim removes spaces
+            if (taskName.isEmpty()) {
+                System.out.println("PLz tell me what you need to do");
+                return;
+            } else {
+                tasks[taskIndex] = new Todo(taskName);
+                System.out.println("Got it. I've added this task:\n  [T][ ] " + taskName);
+            }
+        } else if (userInput.startsWith("deadline")) {
+            String remainingInput = userInput.substring(8).trim();
+            if (!remainingInput.contains(" /by ")) {
+                System.out.println("Invalid format! Use: deadline <task> /by <time>");
+                return;
+            }
+            String[] parts = remainingInput.split(" /by ", 2);
+            if (parts[0].isEmpty() || parts[1].isEmpty()) {
+                System.out.println("Invalid format! Task and deadline time cannot be empty.");
+                return;
+            }
+            tasks[taskIndex] = new Deadline(parts[0].trim(), parts[1].trim());
             System.out.println("Got it. I've added this task:\n  [D][ ] " + parts[0] + " (by: " + parts[1] + ")");
         } else if (userInput.startsWith("event ")) {
-            String[] parts = userInput.substring(6).split(" /from ", 2);
+            String remainingInput = userInput.substring(6).trim();
+            if (!remainingInput.contains(" /from ") || !remainingInput.contains(" /to ")) {
+                System.out.println("Invalid format! Use: event <task> /from <start time> /to <end time>");
+                return;
+            }
+
+            String[] parts = remainingInput.split(" /from ", 2);
+            if (parts.length < 2 || parts[0].isEmpty()) {
+                System.out.println("Invalid format! Task description cannot be empty.");
+                return;
+            }
             String[] timeParts = parts[1].split(" /to ", 2);
-            tasks[taskIndex] = new Event(parts[0], timeParts[0], timeParts[1]);
+            if (timeParts.length < 2 || timeParts[0].isEmpty() || timeParts[1].isEmpty()) {
+                System.out.println("Invalid format! Start and end times cannot be empty.");
+                return;
+            }
+            tasks[taskIndex] = new Event(parts[0].trim(), timeParts[0].trim(), timeParts[1].trim());
             System.out.println("Got it. I've added this task:\n  [E][ ] " + parts[0] + " (from: " + timeParts[0] + " to: " + timeParts[1] + ")");
         } else {
             System.out.println("Invalid task format. Please specify todo, deadline, or event.");
@@ -68,4 +105,25 @@ public class Growler {
             System.out.println("OK, I've marked this task as not done yet:\n" + task);
         }
     }
+    private static boolean isValidTaskCommand(String userInput, String commandPrefix) {
+        try {
+            // Check if the input starts with the correct prefix and has a valid number
+            String numberPart = userInput.substring(commandPrefix.length()).trim();
+            int taskNumber = Integer.parseInt(numberPart); // Convert to integer
+            if (taskNumber <= 0 || taskNumber > taskIndex) {
+                System.out.println("Task number must be between 1 and " + taskIndex + ".");
+                return false;
+            }
+            return true;
+        } catch (NumberFormatException e) {
+            // Handle cases where the input is not a number
+            System.out.println("Please provide a valid task number.");
+            return false;
+        } catch (StringIndexOutOfBoundsException e) {
+            // Handle cases where no number is provided
+            System.out.println("Please specify a task number.");
+            return false;
+        }
+    }
 }
+
