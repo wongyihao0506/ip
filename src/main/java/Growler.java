@@ -123,6 +123,7 @@ public class Growler {
             // Handle cases where no number is provided
             System.out.println("Please specify a task number.");
             return false;
+
         }
     }
 }
