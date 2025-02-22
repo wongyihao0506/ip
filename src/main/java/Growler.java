@@ -29,6 +29,11 @@ public class Growler {
                     return;
                 }
                 markList(userInput, false);
+            } else if (userInput.startsWith("delete")) {
+                if (!isValidTaskCommand(userInput, "delete")) {
+                    System.out.println("Invalid format! Use: delete <task number>");
+                }
+                deleteTask(userInput);
             } else if (userInput.equals("list")) {
                 showList();
             } else {
@@ -126,6 +131,20 @@ public class Growler {
             System.out.println("Please specify a task number.");
             return false;
         }
+    }
+    private static void deleteTask(String userInput) {
+            int taskNumber = Integer.parseInt(userInput.split(" ")[1]) - 1;
+            Task removedTask = tasks[taskNumber];
+            // Shift tasks to fill the gap
+            for (int i = taskNumber; i < taskIndex - 1; i++) {
+                tasks[i] = tasks[i + 1];
+            }
+            tasks[taskIndex - 1] = null; // Clear the last task
+            taskIndex--;
+
+            System.out.println("Noted. I've removed this task:");
+            System.out.println("  " + removedTask);
+            System.out.println("Now you have " + taskIndex + " tasks in the list.");
     }
 }
 
