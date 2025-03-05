@@ -10,4 +10,7 @@ public class Event extends Task {
     public String toString(){
         return "[E]" + super.toString() + " (from: " + startDate + " to: " + endDate + ")";
     }
+    public String toFileFormat() {
+        return "E | " + (isDone ? "1" : "0") + " | " + taskName + " | " + startDate + " | " + endDate;
+    }
 }
