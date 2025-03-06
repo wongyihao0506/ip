@@ -37,6 +37,7 @@ public class Growler {
         }
         in.close();
     }
+
     private static void addTask(String userInput) {
         if (userInput.startsWith("todo")) {
             String taskName = userInput.substring(4).trim(); // Trim removes spaces
@@ -78,7 +79,8 @@ public class Growler {
                 return;
             }
             tasks[taskIndex] = new Event(parts[0].trim(), timeParts[0].trim(), timeParts[1].trim());
-            System.out.println("Got it. I've added this task:\n  [E][ ] " + parts[0] + " (from: " + timeParts[0] + " to: " + timeParts[1] + ")");
+            System.out.println("Got it. I've added this task:\n  [E][ ] " + parts[0] +
+                    " (from: " + timeParts[0] + " to: " + timeParts[1] + ")");
         } else {
             System.out.println("Invalid task format. Please specify todo, deadline, or event.");
             taskIndex--;
