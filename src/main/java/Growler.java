@@ -39,21 +39,18 @@ public class Growler {
             String taskName = userInput.substring(4).trim();
             if (taskName.isEmpty()) {
                 throw new GrowlerException("Please tell me what you need to do.");
-                return;
             }
             newTask = new Todo(taskName);
         } else if (userInput.startsWith("deadline")) {
             String[] parts = userInput.substring(8).trim().split(" /by ", 2);
             if (parts.length < 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
                 throw new GrowlerException("Invalid format! Use: deadline <task> /by <time>");
-                return;
             }
             newTask = new Deadline(parts[0].trim(), parts[1].trim());
         } else if (userInput.startsWith("event")) {
             String[] parts = userInput.substring(6).trim().split(" /from ", 2);
             if (parts.length < 2 || !parts[1].contains(" /to ")) {
                 throw new GrowlerException("Invalid format! Use: event <task> /from <start> /to <end>");
-                return;
             }
             String[] timeParts = parts[1].split(" /to ", 2);
             newTask = new Event(parts[0].trim(), timeParts[0].trim(), timeParts[1].trim());
