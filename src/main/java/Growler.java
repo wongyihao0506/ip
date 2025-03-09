@@ -4,7 +4,7 @@ public class Growler {
     private static Task[] tasks = new Task[100];
     private static int taskCount;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws GrowlerException {
         Storage storage = new Storage();
         taskCount = storage.loadTasks(tasks);
 
@@ -33,26 +33,26 @@ public class Growler {
         in.close();
     }
 
-    private static void handleAddTask(String userInput, Storage storage) {
+    private static void handleAddTask (String userInput, Storage storage) throws GrowlerException {
         Task newTask = null;
         if (userInput.startsWith("todo")) {
             String taskName = userInput.substring(4).trim();
             if (taskName.isEmpty()) {
-                System.out.println("Please tell me what you need to do.");
+                throw new GrowlerException("Please tell me what you need to do.");
                 return;
             }
             newTask = new Todo(taskName);
         } else if (userInput.startsWith("deadline")) {
             String[] parts = userInput.substring(8).trim().split(" /by ", 2);
             if (parts.length < 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
-                System.out.println("Invalid format! Use: deadline <task> /by <time>");
+                throw new GrowlerException("Invalid format! Use: deadline <task> /by <time>");
                 return;
             }
             newTask = new Deadline(parts[0].trim(), parts[1].trim());
         } else if (userInput.startsWith("event")) {
             String[] parts = userInput.substring(6).trim().split(" /from ", 2);
             if (parts.length < 2 || !parts[1].contains(" /to ")) {
-                System.out.println("Invalid format! Use: event <task> /from <start> /to <end>");
+                throw new GrowlerException("Invalid format! Use: event <task> /from <start> /to <end>");
                 return;
             }
             String[] timeParts = parts[1].split(" /to ", 2);
@@ -64,13 +64,12 @@ public class Growler {
             System.out.println("Now you have " + taskCount + " tasks in the list.");
             storage.saveTasks(tasks, taskCount);
         } else {
-            System.out.println("Invalid task format. Please specify todo, deadline, or event.");
+            throw new GrowlerException("Invalid task format. Please specify todo, deadline, or event.");
         }
     }
 
-    private static void handleMarkCommand(String userInput, boolean isMark, Storage storage) {
+    private static void handleMarkCommand(String userInput, boolean isMark, Storage storage) throws GrowlerException {
         if (!isValidTaskCommand(userInput)) return;
-
         int taskIndex = Integer.parseInt(userInput.split(" ")[1]) - 1;
         if (taskIndex >= 0 && taskIndex < taskCount) {
             if (isMark) {
@@ -84,9 +83,8 @@ public class Growler {
         }
     }
 
-    private static void handleDeleteCommand(String userInput, Storage storage) {
+    private static void handleDeleteCommand(String userInput, Storage storage) throws GrowlerException {
         if (!isValidTaskCommand(userInput)) return;
-
         int taskIndex = Integer.parseInt(userInput.split(" ")[1]) - 1;
         if (taskIndex >= 0 && taskIndex < taskCount) {
             Task removedTask = tasks[taskIndex];
@@ -98,17 +96,17 @@ public class Growler {
         }
     }
 
-    private static boolean isValidTaskCommand(String userInput) {
+    private static boolean isValidTaskCommand(String userInput) throws GrowlerException {
         try {
             int taskIndex = Integer.parseInt(userInput.split(" ")[1]) - 1;
             if (taskIndex < 0 || taskIndex >= taskCount) {
-                System.out.println("Task number must be between 1 and " + taskCount + ".");
-                return false;
+                throw new GrowlerException("Task number must be between 1 and " + taskCount + ".");
             }
             return true;
-        } catch (Exception e) {
-            System.out.println("Invalid format! Use: <command> <task number>");
-            return false;
+        } catch (NumberFormatException e) {
+            throw new GrowlerException("Invalid format! Task number must be an integer.");
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new GrowlerException("Invalid format! Use: <command> <task number>");
         }
     }
 
