@@ -22,7 +22,7 @@ public class Growler {
         Task[] tasks = new Task[100];
         int taskCount = storage.loadTasks(tasks);  // Load existing tasks from storage
         TaskList taskList = new TaskList(tasks, taskCount);
-        ui.showWelcomeMessage()
+        ui.showWelcomeMessage();
         Scanner in = new Scanner(System.in);
         while (true) {
             String userInput = in.nextLine();  // Get user input
