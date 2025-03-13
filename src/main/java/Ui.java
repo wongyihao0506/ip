@@ -4,7 +4,7 @@ public class Ui {
     }
 
     public static void showGoodbyeMessage() {
-        System.out.println("Bye. Hope to see you again soon!");
+        System.out.println("Bye. Hope to see you again!");
     }
 
     public static void showTaskAdded(Task task, int taskCount) {
@@ -35,6 +35,7 @@ public class Ui {
     public static void showError(String message) {
         System.out.println("Error: " + message);
     }
+
     public static void showMessage(String message) {
         System.out.println("Message: " + message);
     }
