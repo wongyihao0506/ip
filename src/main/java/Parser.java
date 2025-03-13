@@ -1,4 +1,19 @@
+/**
+ * The Parser class handles user commands for managing tasks.
+ * It processes various commands such as marking, unmarking, deleting tasks,
+ * adding tasks (to-do, deadline, event), and searching tasks.
+ */
 public class Parser {
+
+    /**
+     * Handles the user input command and delegates the corresponding task action.
+     *
+     * @param userInput The command entered by the user.
+     * @param taskList The task list to manipulate.
+     * @param storage The storage for saving tasks.
+     * @param ui The user interface for displaying results.
+     * @throws GrowlerException If an error occurs during command processing.
+     */
     public void handleCommand(String userInput, TaskList taskList, Storage storage, Ui ui) throws GrowlerException {
         if (userInput.startsWith("mark")) {
             handleMarkCommand(userInput, true, taskList, storage, ui);
@@ -15,6 +30,16 @@ public class Parser {
         }
     }
 
+    /**
+     * Adds a new task based on the user input.
+     * Supports to-do, deadline, and event tasks.
+     *
+     * @param userInput The command entered by the user.
+     * @param taskList The task list to add the new task.
+     * @param storage The storage to save the updated task list.
+     * @param ui The user interface to display results.
+     * @throws GrowlerException If the task format is invalid.
+     */
     private void handleAddTask(String userInput, TaskList taskList, Storage storage, Ui ui) throws GrowlerException {
         Task newTask = null;
         if (userInput.startsWith("todo")) {
@@ -46,6 +71,16 @@ public class Parser {
         }
     }
 
+    /**
+     * Marks or unmarks a task as done based on the user input.
+     *
+     * @param userInput The command entered by the user.
+     * @param isMark Whether to mark the task as done (true) or unmark it (false).
+     * @param taskList The task list to modify.
+     * @param storage The storage to save the updated task list.
+     * @param ui The user interface to display results.
+     * @throws GrowlerException If the task index is invalid.
+     */
     private void handleMarkCommand(String userInput, boolean isMark, TaskList taskList, Storage storage, Ui ui) throws GrowlerException {
         int taskIndex = getTaskIndex(userInput, taskList);
         Task task = taskList.getTask(taskIndex);
@@ -59,6 +94,15 @@ public class Parser {
         storage.saveTasks(taskList.tasks, taskList.getTaskCount());
     }
 
+    /**
+     * Deletes a task based on the user input.
+     *
+     * @param userInput The command entered by the user.
+     * @param taskList The task list to delete the task from.
+     * @param storage The storage to save the updated task list.
+     * @param ui The user interface to display results.
+     * @throws GrowlerException If the task index is invalid.
+     */
     private void handleDeleteCommand(String userInput, TaskList taskList, Storage storage, Ui ui) throws GrowlerException {
         int taskIndex = getTaskIndex(userInput, taskList);
         Task removedTask = taskList.getTask(taskIndex);
@@ -67,6 +111,13 @@ public class Parser {
         storage.saveTasks(taskList.tasks, taskList.getTaskCount());
     }
 
+    /**
+     * Finds and displays tasks matching a keyword.
+     *
+     * @param userInput The command entered by the user.
+     * @param taskList The task list to search.
+     * @param ui The user interface to display results.
+     */
     private void handleFindCommand(String userInput, TaskList taskList, Ui ui) {
         String keyword = userInput.substring(4).trim();
         if (keyword.isEmpty()) {
@@ -76,6 +127,14 @@ public class Parser {
         }
     }
 
+    /**
+     * Retrieves the task index from the user input.
+     *
+     * @param userInput The command entered by the user.
+     * @param taskList The task list to validate the index.
+     * @return The index of the task (0-based).
+     * @throws GrowlerException If the task index is invalid or the format is incorrect.
+     */
     private int getTaskIndex(String userInput, TaskList taskList) throws GrowlerException {
         try {
             int taskIndex = Integer.parseInt(userInput.split(" ")[1]) - 1;
