@@ -6,6 +6,9 @@ public class Task {
         this.taskName = taskName;
         this.isDone = false;
     }
+    public String getTaskName() {
+        return taskName;
+    }
 
     public void markDone() {
         this.isDone = true;
