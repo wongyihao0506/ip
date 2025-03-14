@@ -16,7 +16,7 @@
 - **Task Completion**
     - Mark tasks as done (`mark 2`) or not done (`unmark 2`), according to the index of the task 
 - **Task Search** 
-    - Finds and displays all tasks which contains a keyword 
+    - Finds and displays all tasks which contains a keyword (e.g., `find book`)
 - **Task Deletion**
     - Deletes task according to its index (e.g., `delete 2`)
 - **Task Listing**
