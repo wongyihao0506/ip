@@ -1,117 +1,41 @@
 import java.util.Scanner;
 
+/**
+ * The Growler class is the main entry point for the Growler application.
+ * It initializes the necessary components (Storage, Ui, Parser, TaskList) and processes user commands.
+ * The program runs in a loop until the user types "bye", handling task management operations.
+ */
 public class Growler {
-    private static Task[] tasks = new Task[100];
-    private static int taskCount;
 
+    /**
+     * The main method starts the Growler application and processes user commands.
+     * It initializes the storage, UI, parser, and task list, then enters a loop to process commands.
+     * The loop continues until the user types "bye".
+     *
+     * @param args Command-line arguments (not used in this application).
+     * @throws GrowlerException If there is an error while handling tasks (e.g., invalid task format).
+     */
     public static void main(String[] args) throws GrowlerException {
         Storage storage = new Storage();
-        taskCount = storage.loadTasks(tasks);
-
-        String greet = "Hello! I'm Growler \nWhat can I do for you? \n";
-        String farewell = "Bye. Hope to see you again soon!";
-        System.out.println(greet);
-
+        Ui ui = new Ui();
+        Parser parser = new Parser();
+        Task[] tasks = new Task[100];
+        int taskCount = storage.loadTasks(tasks);  // Load existing tasks from storage
+        TaskList taskList = new TaskList(tasks, taskCount);
+        ui.showWelcomeMessage();
         Scanner in = new Scanner(System.in);
         while (true) {
-            String userInput = in.nextLine();
+            String userInput = in.nextLine();  // Get user input
             if (userInput.equals("bye")) {
-                System.out.println(farewell);
+                ui.showGoodbyeMessage();
                 break;
-            } else if (userInput.startsWith("mark")) {
-                handleMarkCommand(userInput, true, storage);
-            } else if (userInput.startsWith("unmark")) {
-                handleMarkCommand(userInput, false, storage);
-            } else if (userInput.startsWith("delete")) {
-                handleDeleteCommand(userInput, storage);
-            } else if (userInput.equals("list")) {
-                showList();
-            } else {
-                handleAddTask(userInput, storage);
+            }
+            try {
+                parser.handleCommand(userInput, taskList, storage, ui);
+            } catch (GrowlerException e) {
+                ui.showError(e.getMessage());
             }
         }
         in.close();
     }
-
-    private static void handleAddTask (String userInput, Storage storage) throws GrowlerException {
-        Task newTask = null;
-        if (userInput.startsWith("todo")) {
-            String taskName = userInput.substring(4).trim();
-            if (taskName.isEmpty()) {
-                throw new GrowlerException("Please tell me what you need to do.");
-            }
-            newTask = new Todo(taskName);
-        } else if (userInput.startsWith("deadline")) {
-            String[] parts = userInput.substring(8).trim().split(" /by ", 2);
-            if (parts.length < 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
-                throw new GrowlerException("Invalid format! Use: deadline <task> /by <time>");
-            }
-            newTask = new Deadline(parts[0].trim(), parts[1].trim());
-        } else if (userInput.startsWith("event")) {
-            String[] parts = userInput.substring(6).trim().split(" /from ", 2);
-            if (parts.length < 2 || !parts[1].contains(" /to ")) {
-                throw new GrowlerException("Invalid format! Use: event <task> /from <start> /to <end>");
-            }
-            String[] timeParts = parts[1].split(" /to ", 2);
-            newTask = new Event(parts[0].trim(), timeParts[0].trim(), timeParts[1].trim());
-        }
-        if (newTask != null) {
-            tasks[taskCount++] = newTask;
-            System.out.println("Got it. I've added this task:\n  " + newTask);
-            System.out.println("Now you have " + taskCount + " tasks in the list.");
-            storage.saveTasks(tasks, taskCount);
-        } else {
-            throw new GrowlerException("Invalid task format. Please specify todo, deadline, or event.");
-        }
-    }
-
-    private static void handleMarkCommand(String userInput, boolean isMark, Storage storage) throws GrowlerException {
-        if (!isValidTaskCommand(userInput)) return;
-        int taskIndex = Integer.parseInt(userInput.split(" ")[1]) - 1;
-        if (taskIndex >= 0 && taskIndex < taskCount) {
-            if (isMark) {
-                tasks[taskIndex].markDone();
-                System.out.println("Nice! I've marked this task as done:\n  " + tasks[taskIndex]);
-            } else {
-                tasks[taskIndex].unmarkDone();
-                System.out.println("OK, I've marked this task as not done yet:\n  " + tasks[taskIndex]);
-            }
-            storage.saveTasks(tasks, taskCount);
-        }
-    }
-
-    private static void handleDeleteCommand(String userInput, Storage storage) throws GrowlerException {
-        if (!isValidTaskCommand(userInput)) return;
-        int taskIndex = Integer.parseInt(userInput.split(" ")[1]) - 1;
-        if (taskIndex >= 0 && taskIndex < taskCount) {
-            Task removedTask = tasks[taskIndex];
-            System.arraycopy(tasks, taskIndex + 1, tasks, taskIndex, taskCount - taskIndex - 1);
-            tasks[--taskCount] = null;
-            System.out.println("Noted. I've removed this task:\n  " + removedTask);
-            System.out.println("Now you have " + taskCount + " tasks in the list.");
-            storage.saveTasks(tasks, taskCount);
-        }
-    }
-
-    private static boolean isValidTaskCommand(String userInput) throws GrowlerException {
-        try {
-            int taskIndex = Integer.parseInt(userInput.split(" ")[1]) - 1;
-            if (taskIndex < 0 || taskIndex >= taskCount) {
-                throw new GrowlerException("Task number must be between 1 and " + taskCount + ".");
-            }
-            return true;
-        } catch (NumberFormatException e) {
-            throw new GrowlerException("Invalid format! Task number must be an integer.");
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new GrowlerException("Invalid format! Use: <command> <task number>");
-        }
-    }
-
-    private static void showList() {
-        System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println((i + 1) + "." + tasks[i]);
-        }
-    }
 }
-
